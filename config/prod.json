@@ -1,0 +1,5 @@
+{
+    "DBHost": "mongodb://localhost:27017/etc_prod",
+    "httpPort": 3000,
+    "logsDirectory": "logs/prod"
+}

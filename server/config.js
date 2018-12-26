@@ -43,11 +43,11 @@ const config = convict({
         arg: 'logsDirectory',
         env: 'LOGS_DIRECTORY',
     },
-    sessionSecret: {
+    jwtSecret: {
         format: String,
-        default: 'default secret',
-        arg: 'sessionSecret',
-        env: 'SESSION_SECRET',
+        default: '__FATAL__',
+        arg: 'jwtSecret',
+        env: 'JWT_SECRET',
     },
 });
 

@@ -1,5 +1,5 @@
 {
-    "DBHost": "mongodb://localhost:27017/etc_test",
+    "DBHost": "mongodb://localhost:27017/test",
     "httpPort": 3002,
     "logsDirectory": "logs/test"
 }

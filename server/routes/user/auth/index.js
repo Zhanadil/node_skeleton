@@ -2,8 +2,8 @@ const express = require('express');
 
 const helpers = require('@routes/helpers');
 const middleware = require('@middleware/auth');
-const controllers = require('@routes/user/controllers/auth');
-const validators = require('@routes/user/validators/auth');
+const controllers = require('@routes/user/auth/controllers');
+const validators = require('@routes/user/auth/validators');
 
 const router = express.Router();
 
@@ -17,6 +17,7 @@ router.post(
 router.post(
     '/signin',
     helpers.validateBody(validators.signIn),
+    middleware.localAuth,
     controllers.signIn
 );
 

@@ -5,7 +5,7 @@ const path = require('path');
 const config = require('@root/config');
 
 let bunyanOptions = {
-    name: '',
+    name: 'CHANGE_THIS',
     streams: [
         {
             stream: new RotatingFileStream({

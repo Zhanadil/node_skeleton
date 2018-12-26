@@ -1,11 +1,11 @@
 const express = require('express');
+const passport = require('passport');
 
-const middleware = require('@middleware/auth');
-const controllers = require('@routes/user/controllers/profile');
+const controllers = require('@routes/user/profile/controllers');
 
 const router = express.Router();
 
-router.use(middleware.validateUser);
+router.use(passport.authenticate('jwt-user', { session: false }));
 
 router.put(
     '/logo',

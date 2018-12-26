@@ -1,8 +1,11 @@
 const joi = require('joi');
 const formdata = require('form-data');
 const http = require('http');
+const jwt = require('jsonwebtoken');
+const to = require('await-to-js').default;
 
 const config = require('@root/config');
+const Models = require('@models');
 
 module.exports = {
 
@@ -40,9 +43,34 @@ validateBody: (schema) => {
 },
 
 // Сохраняем сессию
-saveUserSession: (session, company) => {
-    session.userId = company._id;
-    session.maxAge = 1000 * 60 * 60 * 24; // Одни сутки в миллисекундах
+updateSession: async (user) => {
+    // Создаем новый токен
+    const token = await jwt.sign({
+        iss: 'node',
+        sub: {
+            id: user._id,
+        },
+        iat: Date.now(),
+    }, config.jwtSecret);
+
+    // Находим сессию пользователя если существует
+    const [err] = await to(
+        Models.Session.findOneAndUpdate({
+            user: user._id,
+        }, {
+            token
+        }, {
+            upsert: true,
+            new: true,
+            setDefaultsOnInsert: true,
+        })
+    );
+    if (err) {
+        console.log(err);
+        throw err;
+    }
+
+    return token;
 },
 
 uploadFile: (file, cb) => {

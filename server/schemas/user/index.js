@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const credentialsSchema = require('@models/schemas/credentials');
+const credentialsSchema = require('@schemas/user/credentials');
 
 // Схема пользователей
 const userSchema = mongoose.Schema({

@@ -21,7 +21,7 @@ signUp: async (req, res, next) => {
         return next(err);
     }
 
-    helpers.saveUserSession(req.session, user);
+    await helpers.updateSession(user);
 
     // Скрываем пароль для логов
     user.credentials.password = undefined;
@@ -37,38 +37,27 @@ signUp: async (req, res, next) => {
 },
 
 signIn: async (req, res, next) => {
-    const [err, user] = await to(
-        Models.User.findOne({
-            'credentials.email': req.body.email
-        })
-        .select('+credentials.password')
-        .select('+isAdmin')
+    const user = req.user;
+    const [tokenError, token] = await to(
+        helpers.updateSession(user)
     );
-    if (err) {
-        req.log.error('User.findOne raised an error');
-        return next(err);
-    }
-    if (!user) {
-        req.log.info(`Signin for email[${req.body.email}] failed, incorrect email`);
-        return res.status(401).send('Unauthorized');
+    if (tokenError) {
+        req.log.error('Error updating user session');
+        console.log(tokenError);
+        return next(tokenError);
     }
 
-    // Проверяем пароль на корректность
-    const isVerified = await user.credentials.isValidPassword(req.body.password);
-
-    if (!isVerified) {
-        req.log.info(`Password is not correct`);
-        return res.status(401).send('Unauthorized');
-    }
-
-    // Сохраняем сессию и возвращаем 200
-    helpers.saveUserSession(req.session, user);
     if (!user.isAdmin) {
         req.log.info(`User [${req.body.email}] logged in`);
-        return res.status(200).send('OK');
+        return res.status(200).json({
+            token,
+        });
     }
     req.log.info(`Admin [${req.body.email}] logged in`);
-    return res.status(200).send("admin");
+    return res.status(200).send({
+        token,
+        admin: 'true',
+    });
 },
 
 };

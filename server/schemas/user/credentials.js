@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcrypt-nodejs');
 const to = require('await-to-js').default;
 
 // Схема авторизации юзеров
@@ -24,32 +24,31 @@ const credentialsSchema = mongoose.Schema({
 }, { _id : false });
 
 // Проверка пароля на валидность
-credentialsSchema.methods.isValidPassword = async function(newPassword) {
+credentialsSchema.methods.isValidPassword = function(newPassword) {
     if (!this.password) {
         return false;
     }
 
-    return await bcrypt.compare(newPassword, this.password);
+    return bcrypt.compareSync(newPassword, this.password);
 }
 
 // Хэширование пароля перед сохранением
-credentialsSchema.pre('save', async function(next) {
+credentialsSchema.pre('save', function(next) {
     // Хэшируем только если пароль был изменен.
     // Иначе он может быть захэширован несколько раз и пароль будет утерян
     if (!this.isModified('password')) {
         return next();
     }
 
-    const salt = await bcrypt.genSalt(10);
-    const [err, newPassword] = await to(
-        bcrypt.hash(this.password, salt)
-    );
-    if (err) {
-        return next(err);
-    }
-    this.password = newPassword;
-
-    return next();
+    bcrypt.genSalt(10, (salt) => {
+        bcrypt.hash(this.password, salt, null, (err, hash) => {
+            if (err) {
+                return next(err);
+            }
+            this.password = hash;
+            return next();
+        })
+    });
 });
 
 module.exports = credentialsSchema;

@@ -1,4 +1,5 @@
 const to = require('await-to-js').default;
+const passport = require('passport');
 const Models = require('@models');
 
 module.exports = {
@@ -21,29 +22,19 @@ checkUserEmailEmpty: async (req, res, next) => {
     return next();
 },
 
-// Проверяет куки, и залогинена ли компания
-validateUser: async (req, res, next) => {
-    if (!req.session || !req.session.userId) {
-        return res.status(401).send('Unauthorized');
-    }
+localAuth: (req, res, next) => {
+    passport.authenticate('local-user', { session: false }, (err, user) => {
+        if (err) {
+            return next(err);
+        }
 
-    // Находим пользователя по айди сохраненному в сессии
-    const [err, user] = await to(
-        Models.User.findById(req.session.userId)
-    );
-    if (err) {
-        req.log.error('User.findById throwed an error');
-        return next(err);
-    }
-    if (!user) {
-        req.log.warning(`User [${req.session.userId}] does not exist`);
-        return res.status(401).send('Unauthorized');
-    }
+        if (!user) {
+            return res.status(401).send('Неправильный логин или пароль');
+        }
 
-    // Передаем пользователя далее
-    req.user = user;
-
-    next();
+        req.user = user;
+        return next();
+    })(req, res, next)
 },
 
 };

@@ -6,10 +6,10 @@ const mkdirp = require('mkdirp');
 const fs = require('fs');
 const cors = require('cors');
 const fileUpload = require('express-fileupload');
+const passport = require('passport');
+require('@root/passport');
 
-const session = require('express-session');
 const mongoose = require('mongoose');
-const MongoStore = require('connect-mongo')(session);
 
 const router = require('@routes');
 
@@ -109,14 +109,7 @@ class App {
         express.use(cors());
         express.use(body_parser.json());
         express.use(fileUpload());
-
-        express.set('trust proxy', 1);
-        express.use(session({
-            secret: config.sessionSecret,
-            resave: false,
-            saveUninitialized: true,
-            store: new MongoStore({ mongooseConnection: mongoose.connection })
-        }));
+        express.use(passport.initialize());
 
         // Подключаем роутеры
         express.use('/api', router);

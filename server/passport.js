@@ -78,7 +78,7 @@ passport.use('jwt-admin', new JwtStrategy({
 passport.use('local-user', new LocalStrategy({
     usernameField: 'email',
     passwordField: 'password',
-}, async(email, password, done) => {
+}, async (email, password, done) => {
     const [err, user] = await to(
         Models.User.findOne({
             'credentials.email': email
@@ -93,7 +93,7 @@ passport.use('local-user', new LocalStrategy({
     }
 
     // Проверяем пароль на корректность
-    const isVerified = user.credentials.isValidPassword(password);
+    const isVerified = await user.credentials.isValidPassword(password);
 
     if (!isVerified) {
         return done(null, false);

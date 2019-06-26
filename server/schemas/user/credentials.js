@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const bcrypt = require('bcrypt-nodejs');
+const bcrypt = require('bcryptjs');
 const to = require('await-to-js').default;
 
 // Схема авторизации юзеров
@@ -24,12 +24,18 @@ const credentialsSchema = mongoose.Schema({
 }, { _id : false });
 
 // Проверка пароля на валидность
-credentialsSchema.methods.isValidPassword = function(newPassword) {
+credentialsSchema.methods.isValidPassword = async function(newPassword) {
     if (!this.password) {
         return false;
     }
 
-    return bcrypt.compareSync(newPassword, this.password);
+    const [err, res] = await to(
+      bcrypt.compare(
+        newPassword,
+        this.password
+      )
+    );
+    return res;
 }
 
 // Хэширование пароля перед сохранением
